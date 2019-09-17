@@ -1,2 +1,2 @@
 # packetTracker
-Host of GNU Radio Block
+Host of GNU Radio Code for Packet Tracker
