@@ -8,19 +8,10 @@ print("Starting top_block...")
 tb.start()
 print("Started...")
 
-#######################################
-# Testing the trigger
-
-print("saving...")
-tb.set_trigger(1)
-time.sleep(2)
-tb.set_trigger(-1)
-print("stopping...")
-
 time.sleep(2)
 
 print("saving...")
 tb.set_trigger(1)
-time.sleep(0.5)
+time.sleep(3)
 tb.set_trigger(-1)
 print("stopping...")
