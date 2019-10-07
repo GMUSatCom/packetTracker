@@ -1,9 +1,4 @@
-
-
-
-f = fopen(filename, 'rb');
-v = fread (f, count, 'float');
-t = fread (f, [2, count], 'float');
-v = t(1,:) + t(2,:)*i;
-[r, c] = size (v);
-v = reshape (v, c, r);
+f = fopen('rawIQData', 'rb');
+iqData = fread (f, [2,Inf], 'float');
+fclose(f);
+cData = iqData(1,:) + 1j * iqData(2,:);
