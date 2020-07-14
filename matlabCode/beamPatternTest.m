@@ -12,10 +12,17 @@ d = desLam/2;
 %     d, -d,  d, -d, 0,  0;
 %     0,  0,  0,  0, d, -d];
 
+
+% posVec = [d/2,  -d/2,   d/2,    -d/2;
+%           d/2,  d/2,    -d/2,   -d/2;
+%           0,    0,      0,      0];
+
 nPhones = 4;
 n = 0:nPhones-1;
 posVec = [n*d - mean(n*d); zeros(1,nPhones); zeros(1,nPhones)];
 
+
+% posVec(:,end+1) = [0; d; 0];
 
 
 % posVec = [n*d - mean(n*d); zeros(1,N); zeros(1,N)];
@@ -24,7 +31,7 @@ posVec = [n*d - mean(n*d); zeros(1,nPhones); zeros(1,nPhones)];
 %% Looking Direction
 thLook = deg2rad(90);
 phiLook = deg2rad(90);
-angleVec = 0:0.1:360 - 0.1;
+angleVec = -180:0.1:180 - 0.1;
 
 
 
@@ -36,17 +43,15 @@ angleVec = 0:0.1:360 - 0.1;
 aSteerMat = exp(-1j * 2 * pi * (tarFreq/c) .* (aVec.') * posVec);
 eSteerMat = exp(-1j * 2 * pi * (tarFreq/c) .* (eVec.') * posVec);
 
-n = 0:length(posVec) - 1;
 
 
-aSteerVec = exp(-1j*2*pi* (tarFreq/c) .* cos(phiLook) * n * d);
-aSteerVec = aSteerVec/sum(abs(aSteerVec));
+uLook = thetaPhi2u(thLook, phiLook).';
+steerVec = exp(-1j*2*pi* (tarFreq/c) .* uLook * posVec);
+steerVec = steerVec/sum(abs(steerVec));
 
-eSteerVec = exp(-1j*2*pi* (tarFreq/c) .* cos(thLook) * n * d);
-eSteerVec = eSteerVec/sum(abs(eSteerVec));
 
-eBeamPattern = eSteerMat * eSteerVec';
-aBeamPattern = aSteerMat * aSteerVec';
+eBeamPattern = eSteerMat * steerVec';
+aBeamPattern = aSteerMat * steerVec';
 
 
 
@@ -103,7 +108,7 @@ function [azVec, eleVec, dirVec] = genAzEleVecs(theta, phi)
 
     % Generate Angles to sweep across
     %angleVec = deg2rad(-180:.1:180) - (pi - phi);
-    angleVec = deg2rad(0:.1:360-0.1) - (phi);
+    angleVec = deg2rad(-180:.1:180-0.1) - (phi);
     %eAngleVec = deg2rad(-180:.1:180);
     
     % generate circle centered out orthogonal vector 
