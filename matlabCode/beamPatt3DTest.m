@@ -10,7 +10,8 @@ desLam = c/desFreq;
 % set up microphone arrays distance 
 d = desLam/2;
 
-posVec = [n*d - mean(n*d); zeros(1,N); zeros(1,N)];
+posVec = [n*d - mean(n*d), n*d - mean(n*d); ones(1,N), -1*ones(1,N); zeros(1,N), zeros(1,N)];
+
 nPhones = length(posVec);
 % posVec = [zeros(1,N); zeros(1,N); n*d - mean(n*d)];q
 thLook = deg2rad(90);
@@ -27,7 +28,8 @@ phiVec = phiMat(:).';
 uVec = thetaPhi2u(thVec, phiVec);
 
 steerMat = exp(-1j * 2 * pi * (tarFreq/c) .* (uVec.') * posVec);
-steerVec = exp(-1j * 2 * pi * (tarFreq/c) .* cos(phiLook) * n * d);
+steerVec = exp(-1j * 2 * pi * (tarFreq/c) .* (uVec.') * posVec
+% steerVec = exp(-1j * 2 * pi * (tarFreq/c) .* cos(phiLook) * n * d);
 steerVec = steerVec/sum(abs(steerVec));
 
 beamPattern = steerMat * steerVec';

@@ -17,10 +17,13 @@ d = desLam/2;
 %           d/2,  d/2,    -d/2,   -d/2;
 %           0,    0,      0,      0];
 
-nPhones = 4;
+nPhones = 10;
 n = 0:nPhones-1;
-posVec = [n*d - mean(n*d); zeros(1,nPhones); zeros(1,nPhones)];
+%posVec = [n*d - mean(n*d); zeros(1,nPhones); zeros(1,nPhones)];
+N = nPhones;
+posVec = [n*d - mean(n*d), n*d - mean(n*d); ones(1,N), -1*ones(1,N); zeros(1,N), zeros(1,N)];
 
+figure;scatter3(posVec(:,1), posVec(:,2), posVec(:,3));
 
 % posVec(:,end+1) = [0; d; 0];
 
