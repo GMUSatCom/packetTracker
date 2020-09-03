@@ -1,4 +1,4 @@
-N = 2;
+N = 20;
 K = 100; % numer of snapshots
 Fs = 50000; % sample rate
 
@@ -8,21 +8,25 @@ elements = 1:N;
 % xn = exp(1i*2*pi*3/8);
 tarFreq = 3000;
 desFreq = 3000;
+carrFreq = 3000;
 % cf = 1e6;
 
 % lambda = physconst('LightSpeed')/tarFreq;
 % a = exp(1j*pi*elements*cosd(50)).';
 % x = s * w' *a + w'*xn;
 
-lambda = physconst('LightSpeed')/tarFreq;
+lambda = physconst('LightSpeed')/desFreq;
 ula = phased.ULA('NumElements',N,'ElementSpacing',lambda/2);
 ang1 = [45; 0];          % First signal
 ang2 = [-20; 0];         % Second signal
 angs = [ang1 ];
 Nsamp = (K+1)*1024;
 t = ((0:Nsamp)*1/Fs)';
-xm = sin(2*pi*(tarFreq)*t);
-s = collectPlaneWave(ula,xm,ang1,tarFreq,physconst('LightSpeed'));
+
+% xm = sin(2*pi*(tarFreq)*t);
+xm = chirp(t, 0, max(t),tarFreq);
+
+s = collectPlaneWave(ula,xm,ang1,carrFreq,physconst('LightSpeed'));
 
 posVec = getElementPosition(ula);
 
@@ -50,31 +54,48 @@ end
 % plot(x_axis,P1);
 
 [mf,mi]=min(abs(freqVec-tarFreq));
+f0=freqVec(mi);
+
+%{
+for ih=1:N
+    for iv=1:K
+        X0(ih,iv)=X(mi,ih,iv);
+    end
+end
 
 
-% %% Narrow Band on Design Frequency 
-% X0 = squeeze(X(mi, :,:));
-% Y0 = squeeze(Y(mi, :, :));
-% 
-% R = (1/sqrt(K))*(X0*X0');
-% 
-% thetas = -90:90; 
-% v = exp(1j*pi*elements.'*cosd(thetas-90));
-% v_t = v';
-% 
-% for i=1:length(thetas)
-%     bartOut(i) =  v_t(i,:)*R*v(:,i);   
-% end
-% invR = R^(-1);
-% for i=1:length(thetas)
-%     caponOut(i) =  1/(v_t(i,:)*invR*v(:,i));   
-% end
-% 
-% plot(thetas,db20(bartOut)/max(db20(bartOut)));
-% hold on 
-% plot(thetas,db20(caponOut)/max(db20(caponOut)));
-% hold off
-% legend('bartlett','capon')
+for ih=1:N
+    for iv=1:K
+        Y0(ih,iv)=Y(mi,ih,iv);
+    end
+end
+
+%}
+
+
+%% Narrow Band on Design Frequency 
+X0 = squeeze(X(mi, :,:));
+Y0 = squeeze(Y(mi, :, :));
+
+R = (1/sqrt(K))*(X0*X0');
+
+thetas = -90:90; 
+v = exp(1j*pi*elements.'*cosd(thetas-90));
+v_t = v';
+
+for i=1:length(thetas)
+    bartOut(i) =  v_t(i,:)*R*v(:,i);   
+end
+invR = R^(-1);
+for i=1:length(thetas)
+    caponOut(i) =  1/(v_t(i,:)*invR*v(:,i));   
+end
+
+plot(thetas,db20(bartOut)/max(db20(bartOut)));
+hold on 
+plot(thetas,db20(caponOut)/max(db20(caponOut)));
+hold off
+legend('bartlett','capon')
 
 
 %% Broad Band
@@ -82,12 +103,6 @@ end
 uVec = eleAz2u(0, deg2rad(thetas-180));
 % angleVec = [xData; yData; zData];
 
-
-% figure;plot3(azVec(1,:),azVec(2,:),azVec(3,:));xlabel('x');ylabel('y');
-% figure;scatter3(posVec(1,:),posVec(2,:),posVec(3,:));xlabel('x');ylabel('y');
-
-% steerVec = genSteer(tarFreq, physconst('LightSpeed'), uVec, posVec).';
-% steerVecHer = steerVec';
 
 
 for ff = 1:length(freqVec)
@@ -144,6 +159,20 @@ function [steerOut] = genSteer(freqVal, const, uVec, posVec)
     steerOut = exp( -1j * 2 * pi * (freqVal/const) * uVec.' * posVec);
 
 end 
+% 
+% function steerOut = genSteerFast(freqVal, const, delayVec)
+% 
+%     steerOut = exp(-1j * 2 * pi * (freqVal/const) * delayVec);
+% 
+% end
+
+
+% function imageHandle = imagescc(xData, yData, theData)
+% 
+%     imageHandle = imagesc(xData, yData, flipud(theData));
+%     set(gca,'YDir','normal');
+% 
+% end
 
 
 function outVec = eleAz2u(eleVec, azVec)
